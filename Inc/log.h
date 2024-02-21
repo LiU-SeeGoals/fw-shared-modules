@@ -2,7 +2,11 @@
 #define LOG_H
 
 /* Public includes */
-#include "main.h"
+#if defined STM32H563xx
+#include "stm32h5xx_hal.h"
+#elif defined STM32H755xx
+#include "stm32h7xx_hal.h"
+#endif
 
 /* Public defines */
 #define LOG_BUFFER_SIZE 5
