@@ -3,6 +3,7 @@
 /* Privat includes */
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 /* Private defines */
 #define LOG_BACKENDS_AVAIL 2
