@@ -13,5 +13,6 @@
 
 #define MESSAGE_ID_PING 0
 #define MESSAGE_ID_COMMAND 1
+#define MESSAGE_ID_VISION 2
 
 #endif // FW_SM_RADIO_H
