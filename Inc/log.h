@@ -218,6 +218,7 @@ void LOG_Init(UART_HandleTypeDef *handle);
 void LOG_InitModule(LOG_Module *mod, const char* name, LOG_Level min_output_level);
 void LOG_Printf(LOG_Module *mod, LOG_Level level, const char* format, ...);
 void LOG_PrintLogBuffer(int start, int end);
+void LOG_ToggleMuteAll();
 LOG_Module** LOG_GetModules(int *len);
 LOG_Module* LOG_GetModule(int index);
 LOG_Backend* LOG_GetBackends(int *len);

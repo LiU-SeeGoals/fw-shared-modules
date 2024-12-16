@@ -20,6 +20,7 @@ static int modules_pointer = 0;
 static char log_buffer[LOG_BUFFER_SIZE][LOG_MSG_SIZE];
 static int log_buffer_pointer = 0;
 static uint8_t cycled_logs = 0;
+static uint8_t mute_all_logging = 0;
 static LOG_Backend backends[LOG_BACKENDS_AVAIL] = {
   {
     .name = "UART",
@@ -55,6 +56,10 @@ void LOG_InitModule(LOG_Module *mod, const char* name, LOG_Level min_out_level) 
 
 void LOG_Printf(LOG_Module *mod, LOG_Level msg_level, const char* format, ...) {
   if (msg_level >= mod->min_output_level && !mod->muted) {
+    if (msg_level != LOG_LEVEL_UI && mute_all_logging) {
+      return;
+    }
+
     int offset = 0;
     char msg_buffer[LOG_MSG_SIZE];
 
@@ -108,6 +113,10 @@ LOG_Backend* LOG_GetBackend(int index) {
     return NULL;
   }
   return &backends[index];
+}
+
+void LOG_ToggleMuteAll() {
+  mute_all_logging = !mute_all_logging;
 }
 
 char (*LOG_GetBuffer())[LOG_MSG_SIZE] {
