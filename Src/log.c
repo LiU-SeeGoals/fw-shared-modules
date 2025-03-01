@@ -87,6 +87,7 @@ void LOG_Printf(LOG_Module *mod, LOG_Level msg_level, const char* format, ...) {
     // Log to basestation (through RF)
     if (msg_level >= backends[BACKEND_BASESTATION].min_output_level &&
         !backends[BACKEND_BASESTATION].muted) {
+#ifdef IS_ROBOT
       uint8_t len = strlen(msg_buffer);
       if (len > 32) {
         len = 32;
@@ -101,6 +102,9 @@ void LOG_Printf(LOG_Module *mod, LOG_Level msg_level, const char* format, ...) {
       memcpy(new_str + 3, msg_buffer, len);
 
       COM_RF_Send((uint8_t*)new_str, len + 3);
+#else
+      LOG_ERROR("Can't log to basestation from basestation...\r\n");
+#endif
       return;
     }
 
