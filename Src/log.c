@@ -4,13 +4,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include "com.h"
 
 /* Private defines */
-#define LOG_BACKENDS_AVAIL 2
+#define LOG_BACKENDS_AVAIL 3
 #define LOG_MODULES_AVAIL 10
 #define MODULE_NAME log
-#define LOG_BACKEND_UART 0
-#define LOG_BACKEND_BUFFER 1
 
 /* Private variables */
 static LOG_Module internal_log_mod;
@@ -30,8 +29,19 @@ static LOG_Backend backends[LOG_BACKENDS_AVAIL] = {
   {
     .name = "Buffer",
     .min_output_level = LOG_LEVEL_TRACE,
+    .muted = 1
+  },
+  {
+    .name = "Basestation",
+    .min_output_level = LOG_LEVEL_BASESTATION,
     .muted = 0
   },
+};
+
+enum Backends {
+  BACKEND_UART,
+  BACKEND_BUFFER,
+  BACKEND_BASESTATION
 };
 
 /*
@@ -63,7 +73,7 @@ void LOG_Printf(LOG_Module *mod, LOG_Level msg_level, const char* format, ...) {
     int offset = 0;
     char msg_buffer[LOG_MSG_SIZE];
 
-    if (msg_level != LOG_LEVEL_UI) {
+    if (msg_level != LOG_LEVEL_UI && msg_level != LOG_LEVEL_BASESTATION) {
       offset += snprintf(msg_buffer, LOG_MSG_SIZE, "[%s-%s] ", mod->name, LOG_LEVEL[msg_level].short_name);
     }
 
@@ -74,13 +84,35 @@ void LOG_Printf(LOG_Module *mod, LOG_Level msg_level, const char* format, ...) {
       va_end(args);
     }
 
-    if (msg_level >= backends[LOG_BACKEND_UART].min_output_level &&
-        !backends[LOG_BACKEND_UART].muted) {
+    // Log to basestation (through RF)
+    if (msg_level >= backends[BACKEND_BASESTATION].min_output_level &&
+        !backends[BACKEND_BASESTATION].muted) {
+      uint8_t len = strlen(msg_buffer);
+      if (len > 32) {
+        len = 32;
+      }
+
+      char new_str[32 + 3];
+
+      // prepend magic to tell basestation this is a log message
+      new_str[0] = 0x57;
+      new_str[1] = 0x75;
+      new_str[2] = COM_Get_ID();
+      memcpy(new_str + 3, msg_buffer, len);
+
+      COM_RF_Send((uint8_t*)new_str, len + 3);
+      return;
+    }
+
+    // Log to UART
+    if (msg_level >= backends[BACKEND_UART].min_output_level &&
+        !backends[BACKEND_UART].muted) {
       HAL_UART_Transmit(huart, (uint8_t*)msg_buffer, strlen(msg_buffer), HAL_MAX_DELAY);
     }
 
-    if (msg_level >= backends[LOG_BACKEND_BUFFER].min_output_level &&
-        !backends[LOG_BACKEND_BUFFER].muted) {
+    // Log to buffer
+    if (msg_level >= backends[BACKEND_BUFFER].min_output_level &&
+        !backends[BACKEND_BUFFER].muted) {
       if (cycled_logs) {
         memset(log_buffer[log_buffer_pointer], 0, LOG_MSG_SIZE);
       }
