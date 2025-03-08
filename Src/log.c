@@ -41,14 +41,14 @@ void LOG_Init(UART_HandleTypeDef *handle) {
   huart = handle; 
   uint8_t newline[4] = {'\r', '\n', '\r', '\n'};
   HAL_UART_Transmit(huart, newline, 4, HAL_MAX_DELAY);
-  LOG_InitModule(&internal_log_mod, "LOG", LOG_LEVEL_INFO);
-  LOG_INFO("Initialised...\r\n");
+  LOG_InitModule(&internal_log_mod, "LOG", LOG_LEVEL_INFO, 0);
+  LOG_INFO("Initialised logging...\r\n");
 }
 
-void LOG_InitModule(LOG_Module *mod, const char* name, LOG_Level min_out_level) {
+void LOG_InitModule(LOG_Module *mod, const char* name, LOG_Level min_out_level, uint8_t muted) {
   mod->min_output_level = min_out_level;
   mod->name = name;
-  mod->muted = 0;
+  mod->muted = muted;
   LOG_DEBUG("Adding module: %s\r\n", mod->name);
   log_modules[modules_pointer] = mod;
   modules_pointer++;
