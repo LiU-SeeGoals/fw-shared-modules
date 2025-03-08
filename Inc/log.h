@@ -15,16 +15,11 @@
 #define LOG_PRINTF(level, fmt, ...) LOG_Printf(&internal_log_mod, level, fmt, ##__VA_ARGS__)
 #define LOG_UI(fmt, ...)            LOG_Printf(&internal_log_mod, LOG_LEVEL_UI, fmt, ##__VA_ARGS__)
 #define LOG_TRACE(fmt, ...)         LOG_Printf(&internal_log_mod, LOG_LEVEL_TRACE, fmt, ##__VA_ARGS__)
-#define LOG_DEBUG2(fmt, ...)        LOG_Printf(&internal_log_mod, LOG_LEVEL_DEBUG2, fmt, ##__VA_ARGS__)
-#define LOG_DEBUG1(fmt, ...)        LOG_Printf(&internal_log_mod, LOG_LEVEL_DEBUG1, fmt, ##__VA_ARGS__)
 #define LOG_DEBUG(fmt, ...)         LOG_Printf(&internal_log_mod, LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)          LOG_Printf(&internal_log_mod, LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
-#define LOG_NOTICE(fmt, ...)        LOG_Printf(&internal_log_mod, LOG_LEVEL_NOTICE, fmt, ##__VA_ARGS__)
 #define LOG_WARNING(fmt, ...)       LOG_Printf(&internal_log_mod, LOG_LEVEL_WARNING, fmt, ##__VA_ARGS__)
 #define LOG_ERROR(fmt, ...)         LOG_Printf(&internal_log_mod, LOG_LEVEL_ERROR, fmt, ##__VA_ARGS__)
-#define LOG_CRITICAL(fmt, ...)      LOG_Printf(&internal_log_mod, LOG_LEVEL_CRITICAL, fmt, ##__VA_ARGS__)
-#define LOG_ALERT(fmt, ...)         LOG_Printf(&internal_log_mod, LOG_LEVEL_ALERT, fmt, ##__VA_ARGS__)
-#define LOG_EMERGENCY(fmt, ...)     LOG_Printf(&internal_log_mod, LOG_LEVEL_EMERGENCY, fmt, ##__VA_ARGS__)
+#define LOG_BASESTATION(fmt, ...)   LOG_Printf(&internal_log_mod, LOG_LEVEL_BASESTATION, fmt, ##__VA_ARGS__)
 
 /* Public enums */
 
@@ -56,8 +51,6 @@ typedef enum {
    * Use case: Initialization routines, status of hardware peripherals after
    * setup, algorithmic steps.
    */
-  LOG_LEVEL_DEBUG2,
-  LOG_LEVEL_DEBUG1,
   LOG_LEVEL_DEBUG,
 
   /*
@@ -69,15 +62,6 @@ typedef enum {
    * a regular interval.
    */
   LOG_LEVEL_INFO,
-
-  /*
-   * Normal but significant events that highlight key milestones or
-   * transitions in the application's lifecycle.
-   *
-   * Use case: Mode transitions, completion of significant background tasks,
-   * or readiness of critical components.
-   */
-  LOG_LEVEL_NOTICE,
 
   /**
    * Indications of potential issues that are not immediate problems
@@ -96,30 +80,11 @@ typedef enum {
    * peripheral failures.
    */
   LOG_LEVEL_ERROR,
-  /**
-   * Critical conditions that require immediate attention. Often related
-   * to serious hardware or software failures that could jeopardize the system's stability.
-   *
-   * Use case: Critical resource depletion, watchdog timer resets, system instability issues.
-   */
-  LOG_LEVEL_CRITICAL,
 
   /**
-   * A condition that must be fixed immediately to prevent imminent system
-   * failure. This level is typically used to highlight issues that escalate quickly.
-   *
-   * Use case: Overheating detected, critical communication link down, safety
-   * mechanism triggered.
+   * Logs to basestation. Since it's costly, it's the highest level.
    */
-  LOG_LEVEL_ALERT,
-
-  /**
-   * The highest severity level, indicating the system is unusable
-   * or in a state of complete failure, often requiring a system restart or intervention.
-   *
-   * Use case: System crash, unrecoverable error, complete loss of functionality.
-   */
-  LOG_LEVEL_EMERGENCY,
+  LOG_LEVEL_BASESTATION,
 } LOG_Level;
 
 /* Public structs */
@@ -130,7 +95,7 @@ typedef struct {
 } LOG_Level_Info;
 
 /* Public variables */
-static LOG_Level_Info LOG_LEVEL[LOG_LEVEL_EMERGENCY + 1] = {
+static LOG_Level_Info LOG_LEVEL[LOG_LEVEL_BASESTATION + 1] = {
   {
     .level = LOG_LEVEL_UI,
     .name = "User Interface",
@@ -140,16 +105,6 @@ static LOG_Level_Info LOG_LEVEL[LOG_LEVEL_EMERGENCY + 1] = {
     .level = LOG_LEVEL_TRACE,
     .name = "Trace",
     .short_name = "T",
-  },
-  {
-    .level = LOG_LEVEL_DEBUG2,
-    .name = "Debug2",
-    .short_name = "D2",
-  },
-  {
-    .level = LOG_LEVEL_DEBUG1,
-    .name = "Debug1",
-    .short_name = "D1",
   },
   {
     .level = LOG_LEVEL_DEBUG,
@@ -162,11 +117,6 @@ static LOG_Level_Info LOG_LEVEL[LOG_LEVEL_EMERGENCY + 1] = {
     .short_name = "I",
   },
   {
-    .level = LOG_LEVEL_NOTICE,
-    .name = "Notice",
-    .short_name = "N",
-  },
-  {
     .level = LOG_LEVEL_WARNING,
     .name = "Warning",
     .short_name = "W",
@@ -177,19 +127,9 @@ static LOG_Level_Info LOG_LEVEL[LOG_LEVEL_EMERGENCY + 1] = {
     .short_name = "E",
   },
   {
-    .level = LOG_LEVEL_CRITICAL,
-    .name = "Critical",
-    .short_name = "C",
-  },
-  {
-    .level = LOG_LEVEL_ALERT,
-    .name = "Alert",
-    .short_name = "A",
-  },
-  {
-    .level = LOG_LEVEL_EMERGENCY,
-    .name = "Emergency",
-    .short_name = "E!",
+    .level = LOG_LEVEL_BASESTATION,
+    .name = "Basestation",
+    .short_name = "B",
   }
 };
 
